@@ -74,7 +74,7 @@ eta = Slider(ax_eta, 'Eta', 0.01, 0.2, valinit=0.125, valstep=0.001)
 
 k_p2 = Slider(ax_slider_p2, 'P', 0.1, 10, valinit=2, valstep=0.1)
 t_i2 = Slider(ax_slider_i2, 'I', 0.001, 0.05, valinit=0.016, valstep=0.0001)
-t_d2 = Slider(ax_slider_d2, 'D', 0.001, 0.01, valinit=0.0055, valstep=0.0001)
+t_d2 = Slider(ax_slider_d2, 'D', 0.001, 0.1, valinit=0.0055, valstep=0.0001)
 eta2 = Slider(ax_eta2, 'Eta', 0.01, 0.2, valinit=0.125, valstep=0.001)
 
 gcf_text =TextBox(ax_gcf, "GCF(rad/s):", textalignment="right")
@@ -98,8 +98,9 @@ fmax = 4
 tau_f=1/(t_f.val*2*np.pi)
 Kcopter = 0.033*np.sqrt(W*Ct)*k_m.val/i_y.val
 omega = np.logspace(fmin,fmax,100)
-copter_q=matlab.tf([Kcopter], [t_m.val*tau_f, (t_m.val+tau_f), 1, 0])
-plant_gain, plant_phase, f = matlab.bode(copter_q, omega, plot=False)
+copter_q=matlab.tf([Kcopter], [t_m.val, 1, 0])
+sensor=matlab.tf([1],[tau_f, 1])
+plant_gain, plant_phase, f = matlab.bode(copter_q*sensor, omega, plot=False)
 
 #Controller
 Controller=matlab.tf([k_p.val*t_i.val*t_d.val*(1+eta.val), k_p.val*(t_i.val+eta.val*t_d.val), k_p.val],\
@@ -107,7 +108,7 @@ Controller=matlab.tf([k_p.val*t_i.val*t_d.val*(1+eta.val), k_p.val*(t_i.val+eta.
 ctrl_gain, ctrl_phase, f = matlab.bode(Controller, omega, plot=False)
 
 #openloop
-openloop=copter_q*Controller
+openloop=copter_q*Controller*sensor
 openloop_gain, openloop_phase, f = matlab.bode(openloop, omega, plot=False)
 gm,pm,pcf,gcf = matlab.margin(openloop)
 gcf_text.set_val("{:6.3f}".format(gcf))
@@ -116,12 +117,12 @@ pcf_text.set_val("{:6.3f}".format(pcf))
 gm_text.set_val("{:6.3f}".format(gm))
 
 #closeloop
-closeloop=matlab.feedback(openloop,1)
+closeloop=matlab.feedback(copter_q*Controller,sensor)
 closeloop_gain, closeloop_phase, f = matlab.bode(closeloop, omega, plot=False)
 
 #impulse
 t=np.linspace(0,0.2,200)
-impulse_y, impulse_t = matlab.impulse(closeloop,t)
+#impulse_y, impulse_t = matlab.impulse(closeloop,t)
 
 #step
 step_y,step_t = matlab.step(closeloop,t)
@@ -156,11 +157,11 @@ ax_closeloop_gain.set_ylim(-120,40)
 
 ax_closeloop_phase.set_xscale('log')
 ax_closeloop_phase.set_xlim(10**fmin,10**fmax)
-ax_closeloop_phase.set_ylim(-270,270)
-ax_closeloop_phase.set_yticks([279, 180, 90, 0,-90,-180,-270])
+#ax_closeloop_phase.set_ylim(-270,270)
+#ax_closeloop_phase.set_yticks([279, 180, 90, 0,-90,-180,-270])
 
 closeloop_gain_line, = ax_closeloop_gain.plot(f, 20*np.log10(closeloop_gain), lw=2, c='g')
-closeloop_phase_line, =ax_closeloop_phase.plot(f, closeloop_phase*180/np.pi, lw=2, c='g')
+closeloop_phase_line, =ax_closeloop_phase.plot(f, 360+closeloop_phase*180/np.pi, lw=2, c='g')
 
 
 ax_step.set_xlim(0,0.2)
@@ -171,7 +172,9 @@ step_line, = ax_step.plot(step_t, step_y, c="r", lw =2)
 #---- Angle control ----
 #Drone
 copter_pitch=closeloop
-plant_gain2, plant_phase2, f = matlab.bode(copter_pitch, omega, plot=False)
+integral = matlab.tf([1],[1,0])
+plant = integral*copter_pitch
+plant_gain2, plant_phase2, f = matlab.bode(plant, omega, plot=False)
 
 #Controller
 Controller2=matlab.tf([k_p2.val*t_i2.val*t_d2.val*(1+eta2.val), k_p2.val*(t_i2.val+eta2.val*t_d2.val), k_p2.val],\
@@ -179,7 +182,7 @@ Controller2=matlab.tf([k_p2.val*t_i2.val*t_d2.val*(1+eta2.val), k_p2.val*(t_i2.v
 ctrl_gain2, ctrl_phase2, f = matlab.bode(Controller2, omega, plot=False)
 
 #openloop
-openloop2=copter_pitch*Controller2
+openloop2=plant*Controller2
 openloop_gain2, openloop_phase2, f = matlab.bode(openloop2, omega, plot=False)
 gm2,pm2,pcf2,gcf2 = matlab.margin(openloop2)
 gcf_text2.set_val("{:6.3f}".format(gcf2))
@@ -192,11 +195,11 @@ closeloop2=matlab.feedback(openloop2,1)
 closeloop_gain2, closeloop_phase2, f = matlab.bode(closeloop2, omega, plot=False)
 
 #impulse
-t=np.linspace(0,0.2,200)
-impulse_y2, impulse_t2 = matlab.impulse(closeloop2,t)
+t2=np.linspace(0,10,200)
+#impulse_y2, impulse_t2 = matlab.impulse(closeloop2,t2)
 
 #step
-step_y2,step_t2 = matlab.step(closeloop2,t)
+step_y2,step_t2 = matlab.step(closeloop2,t2)
 
 
 # グラフ描画
@@ -232,8 +235,8 @@ ax_closeloop_phase2.set_yticks([279, 180, 90, 0,-90,-180,-270])
 closeloop_gain_line2, = ax_closeloop_gain2.plot(f, 20*np.log10(closeloop_gain2), lw=2, c='g')
 closeloop_phase_line2, =ax_closeloop_phase2.plot(f, closeloop_phase2*180/np.pi, lw=2, c='g')
 
-ax_step2.set_xlim(0,0.2)
-ax_step2.set_ylim(0,1.5)
+ax_step2.set_xlim(0,10)
+#ax_step2.set_ylim(0,1.5)
 step_line2, = ax_step2.plot(step_t2, step_y2, c="r", lw =2)
 
 ax_openloop_gain.grid()
@@ -264,16 +267,17 @@ def update(slider_val):
     tau_f=1/(t_f.val*2*np.pi)
     Kcopter = 0.033*np.sqrt(W*Ct)*k_m.val/i_y.val
     omega = np.logspace(fmin,fmax,100)
-    copter_q=matlab.tf([Kcopter], [t_m.val*tau_f, (t_m.val+tau_f), 1, 0])
-    plant_gain, plant_phase, f = matlab.bode(copter_q, omega, plot=False)
-    
+    copter_q=matlab.tf([Kcopter], [t_m.val, 1, 0])
+    sensor=matlab.tf([1],[tau_f, 1])
+    plant_gain, plant_phase, f = matlab.bode(copter_q*sensor, omega, plot=False)
+
     #Controller
     Controller=matlab.tf([k_p.val*t_i.val*t_d.val*(1+eta.val), k_p.val*(t_i.val+eta.val*t_d.val), k_p.val],\
                          [eta.val*t_i.val*t_d.val, t_i.val, 0])
     ctrl_gain, ctrl_phase, f = matlab.bode(Controller, omega, plot=False)
 
     #openloop
-    openloop=copter_q*Controller
+    openloop=copter_q*Controller*sensor
     openloop_gain, openloop_phase, f = matlab.bode(openloop, omega, plot=False)
     gm,pm,pcf,gcf = matlab.margin(openloop)
     gcf_text.set_val("{:6.3f}".format(gcf))
@@ -282,7 +286,7 @@ def update(slider_val):
     gm_text.set_val("{:6.3f}".format(gm))
 
     #closeloop
-    closeloop=matlab.feedback(openloop,1)
+    closeloop=matlab.feedback(copter_q*Controller,sensor)
     closeloop_gain, closeloop_phase, f = matlab.bode(closeloop, omega, plot=False)
     
     #step
@@ -316,7 +320,9 @@ def update(slider_val):
     #---- Angle control ----
     #Drone
     copter_pitch=closeloop
-    plant_gain2, plant_phase2, f = matlab.bode(copter_pitch, omega, plot=False)
+    integral = matlab.tf([1],[1,0])
+    plant = integral*copter_pitch
+    plant_gain2, plant_phase2, f = matlab.bode(plant, omega, plot=False)
 
     #Controller
     Controller2=matlab.tf([k_p2.val*t_i2.val*t_d2.val*(1+eta2.val), k_p2.val*(t_i2.val+eta2.val*t_d2.val), k_p2.val],\
@@ -324,7 +330,7 @@ def update(slider_val):
     ctrl_gain2, ctrl_phase2, f = matlab.bode(Controller2, omega, plot=False)
 
     #openloop
-    openloop2=copter_pitch*Controller2
+    openloop2=plant*Controller2
     openloop_gain2, openloop_phase2, f = matlab.bode(openloop2, omega, plot=False)
     gm2,pm2,pcf2,gcf2 = matlab.margin(openloop2)
     gcf_text2.set_val("{:6.3f}".format(gcf2))
@@ -337,11 +343,11 @@ def update(slider_val):
     closeloop_gain2, closeloop_phase2, f = matlab.bode(closeloop2, omega, plot=False)
 
     #impulse
-    t=np.linspace(0,0.2,200)
-    impulse_y2, impulse_t2 = matlab.impulse(closeloop2,t)
+    t2=np.linspace(0,10,200)
+    #impulse_y2, impulse_t2 = matlab.impulse(closeloop2,t)
 
     #step
-    step_y2,step_t2 = matlab.step(closeloop2,t)
+    step_y2,step_t2 = matlab.step(closeloop2,t2)
     
      # xとyの値を更新
     plant_gain_line2.set_xdata(f)
