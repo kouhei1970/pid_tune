@@ -327,10 +327,10 @@ def update(slider_val):
     openloop2=copter_pitch*Controller2
     openloop_gain2, openloop_phase2, f = matlab.bode(openloop2, omega, plot=False)
     gm2,pm2,pcf2,gcf2 = matlab.margin(openloop2)
-    #gcf_text.set_val("{:6.3f}".format(gcf))
-    #pm_text.set_val("{:6.3f}".format(pm))
-    #pcf_text.set_val("{:6.3f}".format(pcf))
-    #gm_text.set_val("{:6.3f}".format(gm))
+    gcf_text2.set_val("{:6.3f}".format(gcf2))
+    pm_text2.set_val("{:6.3f}".format(pm2))
+    pcf_text2.set_val("{:6.3f}".format(pcf2))
+    gm_text2.set_val("{:6.3f}".format(gm2))
 
     #closeloop
     closeloop2=matlab.feedback(openloop2,1)
