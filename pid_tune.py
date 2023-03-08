@@ -67,14 +67,14 @@ i_y = Slider(ax_slider_iy, 'Iy', Iy/10, Iy*10, valinit=Iy, valstep=1e-7, valfmt=
 t_m = Slider(ax_slider_t, 'Tm', Tm/10, Tm*10, valinit=Tm, valstep=1e-4)
 t_f = Slider(ax_slider_f, 'Tf', 5, 250, valinit=Tf, valstep=1)
 
-k_p = Slider(ax_slider_p, 'P', 0.1, 1.0, valinit=0.8, valstep=0.01)
-t_i = Slider(ax_slider_i, 'I', 0.0, 10.0, valinit=2.5, valstep=0.01)
-t_d = Slider(ax_slider_d, 'D', 0.01, 0.05, valinit=0.03, valstep=0.001)
+k_p = Slider(ax_slider_p, 'P', 0.1, 1.0, valinit=1.0, valstep=0.01)
+t_i = Slider(ax_slider_i, 'I', 0.0, 10.0, valinit=1.0, valstep=0.01)
+t_d = Slider(ax_slider_d, 'D', 0.01, 0.05, valinit=0.0, valstep=0.001)
 eta = Slider(ax_eta, 'Eta', 0.01, 0.2, valinit=0.125, valstep=0.001)
 
-k_p2 = Slider(ax_slider_p2, 'P', 0.1, 10, valinit=2, valstep=0.1)
-t_i2 = Slider(ax_slider_i2, 'I', 0.001, 0.05, valinit=0.016, valstep=0.0001)
-t_d2 = Slider(ax_slider_d2, 'D', 0.001, 0.1, valinit=0.0055, valstep=0.0001)
+k_p2 = Slider(ax_slider_p2, 'P', 1, 25, valinit=1, valstep=0.1)
+t_i2 = Slider(ax_slider_i2, 'I', 0.1, 1, valinit=1, valstep=0.0001)
+t_d2 = Slider(ax_slider_d2, 'D', 0.00, 0.05, valinit=0.00, valstep=0.0001)
 eta2 = Slider(ax_eta2, 'Eta', 0.01, 0.2, valinit=0.125, valstep=0.001)
 
 gcf_text =TextBox(ax_gcf, "GCF(rad/s):", textalignment="right")
@@ -136,8 +136,8 @@ ax_openloop_gain.set_ylim(-120,120)
 
 ax_openloop_phase.set_xscale('log')
 ax_openloop_phase.set_xlim(10**fmin,10**fmax)
-ax_openloop_phase.set_ylim(-270,270)
-ax_openloop_phase.set_yticks([279, 180, 90, 0,-90,-180,-270])
+ax_openloop_phase.set_ylim(-270,90)
+ax_openloop_phase.set_yticks([90, 0,-90,-180,-270])
 
 
 
@@ -157,8 +157,8 @@ ax_closeloop_gain.set_ylim(-120,40)
 
 ax_closeloop_phase.set_xscale('log')
 ax_closeloop_phase.set_xlim(10**fmin,10**fmax)
-#ax_closeloop_phase.set_ylim(-270,270)
-#ax_closeloop_phase.set_yticks([279, 180, 90, 0,-90,-180,-270])
+ax_closeloop_phase.set_ylim(-270,90)
+ax_closeloop_phase.set_yticks([90, 0,-90,-180,-270])
 
 closeloop_gain_line, = ax_closeloop_gain.plot(f, 20*np.log10(closeloop_gain), lw=2, c='g')
 closeloop_phase_line, =ax_closeloop_phase.plot(f, 360+closeloop_phase*180/np.pi, lw=2, c='g')
@@ -210,8 +210,8 @@ ax_openloop_gain2.set_ylim(-120,120)
 
 ax_openloop_phase2.set_xscale('log')
 ax_openloop_phase2.set_xlim(10**fmin,10**fmax)
-ax_openloop_phase2.set_ylim(-270,270)
-ax_openloop_phase2.set_yticks([279, 180, 90, 0,-90,-180,-270])
+ax_openloop_phase2.set_ylim(-270,90)
+ax_openloop_phase2.set_yticks([90, 0,-90,-180,-270])
 
 plant_gain_line2, = ax_openloop_gain2.plot(f, 20*np.log10(plant_gain2), lw=1)
 plant_phase_line2, =ax_openloop_phase2.plot(f, plant_phase2*180/np.pi, lw=1)
@@ -229,8 +229,8 @@ ax_closeloop_gain2.set_ylim(-120,40)
 
 ax_closeloop_phase2.set_xscale('log')
 ax_closeloop_phase2.set_xlim(10**fmin,10**fmax)
-ax_closeloop_phase2.set_ylim(-270,270)
-ax_closeloop_phase2.set_yticks([279, 180, 90, 0,-90,-180,-270])
+ax_closeloop_phase2.set_ylim(-270,90)
+ax_closeloop_phase2.set_yticks([90, 0,-90,-180,-270])
 
 closeloop_gain_line2, = ax_closeloop_gain2.plot(f, 20*np.log10(closeloop_gain2), lw=2, c='g')
 closeloop_phase_line2, =ax_closeloop_phase2.plot(f, closeloop_phase2*180/np.pi, lw=2, c='g')
