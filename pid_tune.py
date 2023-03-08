@@ -67,7 +67,7 @@ i_y = Slider(ax_slider_iy, 'Iy', Iy/10, Iy*10, valinit=Iy, valstep=1e-7, valfmt=
 t_m = Slider(ax_slider_t, 'Tm', Tm/10, Tm*10, valinit=Tm, valstep=1e-4)
 t_f = Slider(ax_slider_f, 'Tf', 5, 250, valinit=Tf, valstep=1)
 
-k_p = Slider(ax_slider_p, 'P', 0.1, 1.0, valinit=1.0, valstep=0.01)
+k_p = Slider(ax_slider_p, 'P', 0.1, 10.0, valinit=1.0, valstep=0.01)
 t_i = Slider(ax_slider_i, 'I', 0.0, 10.0, valinit=1.0, valstep=0.01)
 t_d = Slider(ax_slider_d, 'D', 0.01, 0.05, valinit=0.0, valstep=0.001)
 eta = Slider(ax_eta, 'Eta', 0.01, 0.2, valinit=0.125, valstep=0.001)
